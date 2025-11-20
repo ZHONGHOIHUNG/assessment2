@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EPD Risk Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root{
+        --text:#111827;
+        --muted:#6b7280;
+        --border:#e5e7eb;
+        --bg:#f8fafc;
+        --bg-soft:#f3f4f6;
+        --primary:#2563eb;
+        --danger:#b91c1c;
+        --success:#065f46;
+        --warning:#92400e;
+        --red-soft:#fee2e2;
+        --yellow-soft:#fef3c7;
+        --green-soft:#dcfce7;
+      }
+      html,body{
+        height:100%;
+      }
+      body{
+        margin:0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+        color:var(--text);
+        background:var(--bg);
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        line-height:1.55;
+        font-size:18px;
+        font-weight:500;
+      }
+      h1,h2,h3{
+        margin:0 0 8px 0;
+        letter-spacing: .2px;
+      }
+      .data-table{
+        width:100%;
+        border-collapse:collapse;
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:10px;
+        overflow:hidden;
+      }
+      .data-table thead th{
+        font-size:18px;
+        font-weight:700;
+        color:var(--muted);
+        text-transform:uppercase;
+        letter-spacing:.04em;
+        background:var(--bg-soft);
+        border-bottom:1px solid var(--border);
+        padding:10px 8px;
+      }
+      .data-table tbody td{
+        font-size:18px;
+        font-weight:500;
+        padding:10px 8px;
+        border-bottom:1px solid var(--bg-soft);
+      }
+      /* Remove row-wide hover effect to avoid selecting an entire row */
+      .data-table tbody td a{
+        font-weight:600;
+      }
+      .btn-pill{
+        padding:10px 14px;
+        border-radius:999px;
+        border:1px solid var(--border);
+        background:#fff;
+        color:var(--text);
+        cursor:pointer;
+        transition: all .15s ease;
+        font-weight:700;
+        font-size:18px;
+        height:44px;
+      }
+      .btn-pill:hover{
+        background:var(--bg-soft);
+      }
+      .page-wrap{
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 16px 64px;
+      }
+      @media (min-width: 1600px){
+        .page-wrap{
+          padding-left: 96px;
+          padding-right: 96px;
+        }
+      }
+      @media (min-width: 1920px){
+        .page-wrap{
+          padding-left: 120px;
+          padding-right: 120px;
+        }
+      }
+      .toolbar{
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: var(--bg);
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .spacer{ flex: 1; }
+      /* Make toolbar controls larger and bolder for readability */
+      .toolbar button{ font-size:18px; font-weight:700; height:44px; }
+      .toolbar a{
+        font-size:18px;
+        font-weight:600;
+      }
+      .toolbar label{
+        font-size:18px;
+        font-weight:600;
+      }
+      .toolbar input[type="text"]{
+        font-size:18px;
+        height:44px;
+        padding:10px 14px;
+      }
+      a{
+        color:var(--primary);
+        text-decoration:none;
+      }
+      a:hover{
+        text-decoration:underline;
+      }
+
+      /* Per-product hover affordance */
+      .product-card{
+        transition: transform .12s ease, background-color .12s ease, box-shadow .12s ease;
+        border-radius: 8px;
+        padding: 6px 8px;
+        will-change: transform;
+      }
+      .product-card:hover{
+        background: #f3f4f6;
+        transform: scale(1.01);
+        box-shadow: 0 1px 0 rgba(0,0,0,0.04) inset;
+      }
+      .product-card:focus{
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.35);
+        background: #f3f4f6;
+      }
+
+      /* Hero banner with subtle translucent forest background */
+      .hero{
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        /* Dense green forest only (no rocks, no lake) */
+        background-image: var(--hero-img, url('https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?q=80&w=1600&auto=format&fit=crop'));
+        background-size: cover;
+        background-position: center;
+        min-height: 220px;
+      }
+      .hero::before{
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Dark green gradient veil to make light text pop */
+        background: linear-gradient(0deg, rgba(6, 24, 13, 0.55), rgba(6, 24, 13, 0.35));
+        backdrop-filter: blur(0.5px);
+      }
+      .hero-content{
+        position: relative;
+        padding: 24px 28px;
+        min-height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-B3Ek3T7T.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+  </html>
+

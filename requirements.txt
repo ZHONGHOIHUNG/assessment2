@@ -1,0 +1,13 @@
+Flask==3.0.0
+openai==1.54.0
+numpy==1.24.3
+python-dotenv==1.0.0
+
+# Pin httpx for compatibility with openai==1.54.0 (avoids proxies kwarg error)
+httpx==0.27.2
+
+# Backend for EPD Screener
+Flask-Cors==4.0.0
+SQLAlchemy==2.0.23
+Flask-SQLAlchemy==3.1.1
+

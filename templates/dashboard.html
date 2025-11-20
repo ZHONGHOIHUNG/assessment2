@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Search - Building Materials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .product-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .filter-section {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .chat-window {
+            width: 400px;
+            height: 500px;
+            display: none;
+        }
+        .chat-window.active {
+            display: flex;
+        }
+        .message-user {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .message-assistant {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .loading-dots::after {
+            content: '...';
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">AI Product Search</h1>
+                    <p class="text-sm text-gray-600">Building & Architectural Materials</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="statsBtn" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        📊 Statistics
+                    </button>
+                    <button id="filterToggleBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 lg:hidden">
+                        🔍 Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Filters Sidebar -->
+            <aside id="filterSidebar" class="lg:w-64 bg-white rounded-lg shadow-sm p-4 h-fit sticky top-20">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Filters</h2>
+                    <button id="clearFilters" class="text-sm text-blue-600 hover:text-blue-800">Clear all</button>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-2">Categories</h3>
+                    <div id="categoryFilters" class="filter-section space-y-1">
+                        <p class="text-sm text-gray-500">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Manufacturer Filter -->
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-2">Manufacturers</h3>
+                    <input type="text" id="manufacturerSearch" placeholder="Search manufacturers..." 
+                           class="w-full px-3 py-1 text-sm border rounded mb-2">
+                    <div id="manufacturerFilters" class="filter-section space-y-1">
+                        <p class="text-sm text-gray-500">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Sustainability Filter -->
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-2">Sustainability</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-sm">
+                            <input type="checkbox" id="filterCertifications" class="mr-2">
+                            <span>Has Certifications</span>
+                        </label>
+                        <label class="flex items-center text-sm">
+                            <input type="checkbox" id="filterCarbonData" class="mr-2">
+                            <span>Has Carbon Data</span>
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1">
+                <!-- Search Bar -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex gap-2">
+                        <input type="text" id="searchInput" 
+                               placeholder="Search for building materials, e.g., 'sustainable timber cladding' or 'low carbon flooring'..."
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="searchBtn" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                            Search
+                        </button>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <button class="example-query px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full">
+                            sustainable facade materials
+                        </button>
+                        <button class="example-query px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full">
+                            low carbon concrete
+                        </button>
+                        <button class="example-query px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full">
+                            recycled flooring
+                        </button>
+                        <button class="example-query px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full">
+                            timber cladding with certifications
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Info -->
+                <div id="resultsInfo" class="mb-4 hidden">
+                    <p class="text-gray-600">
+                        Found <span id="resultCount" class="font-semibold">0</span> products for 
+                        "<span id="searchQuery" class="font-semibold"></span>"
+                    </p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p class="mt-4 text-gray-600">Searching products...</p>
+                </div>
+
+                <!-- Results Grid -->
+                <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Products will be inserted here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden text-center py-12">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">No products found</h3>
+                    <p class="mt-2 text-gray-500">Try adjusting your filters or search terms</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 flex items-center justify-center">
+            <div class="bg-white rounded-lg max-w-4xl w-full p-6 relative">
+                <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div id="modalContent">
+                    <!-- Product details will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 flex items-center justify-center">
+            <div class="bg-white rounded-lg max-w-4xl w-full p-6 relative">
+                <button id="closeStatsModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <h2 class="text-2xl font-bold mb-6">Database Statistics</h2>
+                <div id="statsContent">
+                    <p class="text-gray-500">Loading statistics...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-container">
+        <!-- Chat Window -->
+        <div id="chatWindow" class="chat-window flex flex-col bg-white rounded-lg shadow-2xl">
+            <div class="bg-blue-600 text-white px-4 py-3 rounded-t-lg flex justify-between items-center">
+                <h3 class="font-semibold">AI Product Assistant</h3>
+                <button id="closeChatBtn" class="hover:bg-blue-700 rounded p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div class="message-assistant rounded-lg p-3 text-sm">
+                    👋 Hi! I'm your AI assistant. Ask me anything about building materials and products!
+                </div>
+            </div>
+            <div class="p-4 border-t">
+                <div class="flex gap-2">
+                    <input type="text" id="chatInput" 
+                           placeholder="Ask about products..."
+                           class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button id="sendChatBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle Button -->
+        <button id="chatToggleBtn" class="bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/search.js"></script>
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
+
